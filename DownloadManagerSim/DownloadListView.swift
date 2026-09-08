@@ -33,6 +33,10 @@ struct DownloadListView: View {
                     }
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    
+                    if let progress = item.currentProgress {
+                        ProgressView(value: progress, total: 100)
+                    }
                 }
             }
             .navigationTitle("Downloads")

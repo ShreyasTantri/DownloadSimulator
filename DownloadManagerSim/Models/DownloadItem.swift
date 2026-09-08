@@ -41,4 +41,15 @@ extension DownloadItem {
             return "Failed"
         }
     }
+    
+    var currentProgress: Double? {
+        switch state {
+            case .downloading(let progress), .paused(let progress):
+                return progress
+            case .completed:
+                return 100
+            case .failed, .queued:
+                return nil
+        }
+    }
 }
