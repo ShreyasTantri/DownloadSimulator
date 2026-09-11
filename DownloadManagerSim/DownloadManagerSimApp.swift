@@ -11,7 +11,7 @@ import SwiftUI
 struct DownloadManagerSimApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DownloadListView()
         }
     }
 }

@@ -52,4 +52,15 @@ extension DownloadItem {
                 return nil
         }
     }
+    
+    var actionIconName: String? {
+        switch state {
+        case .downloading:
+            return "pause.circle.fill"
+        case .paused, .queued, .failed:
+            return "play.circle.fill"
+        case .completed:
+            return nil
+        }
+    }
 }

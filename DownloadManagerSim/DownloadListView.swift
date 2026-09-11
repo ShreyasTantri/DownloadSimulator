@@ -11,14 +11,6 @@ import SwiftUI
 struct DownloadListView: View {
     @State private var viewModel = DownloadManagerViewModel()
     var body: some View {
-
-/*
-        NavigationStack -> .navigationTitle("Downloads")
-            |
-          List
-            |
-             -- VStack(alignment: .leading)
-*/
         
         NavigationStack {
             List(viewModel.downloads) { item in
@@ -30,6 +22,15 @@ struct DownloadListView: View {
                         Text(item.statusText)
                         Spacer()
                         Text("\(item.fileSize, specifier: "%.1f") MB")
+                        
+                        if let iconName = item.actionIconName {
+                            Button {
+                                viewModel.toggleDownload(for: item.id)
+                            } label: {
+                                Image(systemName: iconName)
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     }
                     .font(.subheadline)
                     .foregroundColor(.secondary)
