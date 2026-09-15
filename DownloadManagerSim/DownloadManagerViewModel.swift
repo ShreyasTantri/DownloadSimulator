@@ -5,6 +5,7 @@
 //  Created by CCS038 on 08/09/26.
 //
 import Foundation
+import SwiftUI
 
 @Observable
 class DownloadManagerViewModel {
@@ -16,7 +17,9 @@ class DownloadManagerViewModel {
     
     func startDownload(id: UUID) {
         if let index = downloads.firstIndex(where: { $0.id == id }) {
-            downloads[index].state = .downloading(progress: 0.0)
+            let item = downloads[index]
+            let startingProgress = item.currentProgress ?? 0.0
+            downloads[index].state = .downloading(progress: startingProgress)
             
             Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
                 guard let self = self else { return }
@@ -62,5 +65,30 @@ class DownloadManagerViewModel {
                 break
             }
         }
+    }
+    
+    func deleteDownload(at offsets: IndexSet) {
+        for index in offsets {
+            let item = downloads[index]
+            
+            if case .downloading = item.state {
+                pauseDownload(id: item.id)
+            }
+        }
+    
+        downloads.remove(atOffsets: offsets)
+    }
+    
+    func addRandomDownload() {
+        let randomSize = Double.random(in: 15.0...300.0)
+        let randomFileNumber = Int.random(in: 1000...9999)
+        
+        let newItem = DownloadItem(
+            fileName: "Asset_Bundle_\(randomFileNumber).zip",
+            fileSize: randomSize,
+            state: .queued
+        )
+        
+        downloads.append(newItem)
     }
 }

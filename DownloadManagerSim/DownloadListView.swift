@@ -13,34 +13,44 @@ struct DownloadListView: View {
     var body: some View {
         
         NavigationStack {
-            List(viewModel.downloads) { item in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.fileName)
-                        .font(.headline)
-                    
-                    HStack {
-                        Text(item.statusText)
-                        Spacer()
-                        Text("\(item.fileSize, specifier: "%.1f") MB")
+            List {
+                ForEach(viewModel.downloads) { item in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.fileName)
+                            .font(.headline)
                         
-                        if let iconName = item.actionIconName {
-                            Button {
-                                viewModel.toggleDownload(for: item.id)
-                            } label: {
-                                Image(systemName: iconName)
+                        HStack {
+                            Text(item.statusText)
+                            Spacer()
+                            Text("\(item.fileSize, specifier: "%.1f") MB")
+                            
+                            if let iconName = item.actionIconName {
+                                Button {
+                                    viewModel.toggleDownload(for: item.id)
+                                } label: {
+                                    Image(systemName: iconName)
+                                }
+                                .buttonStyle(.borderless)
                             }
-                            .buttonStyle(.borderless)
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        
+                        if let progress = item.currentProgress {
+                            ProgressView(value: progress, total: 100)
                         }
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    
-                    if let progress = item.currentProgress {
-                        ProgressView(value: progress, total: 100)
-                    }
                 }
+                .onDelete(perform: viewModel.deleteDownload)
             }
             .navigationTitle("Downloads")
+            .toolbar {
+                Button {
+                    viewModel.addRandomDownload()
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
         }
         
     }
