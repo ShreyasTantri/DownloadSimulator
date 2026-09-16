@@ -15,13 +15,15 @@ class DownloadManagerViewModel {
         DownloadItem(fileName: "FileC", fileSize: 17.2, state: .completed)
     ]
     
+    private var activeTimers: [UUID: Timer] = [:]
+    
     func startDownload(id: UUID) {
         if let index = downloads.firstIndex(where: { $0.id == id }) {
             let item = downloads[index]
             let startingProgress = item.currentProgress ?? 0.0
             downloads[index].state = .downloading(progress: startingProgress)
             
-            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            let newTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
                 guard let self = self else { return }
                 
                 guard let currentIndex = self.downloads.firstIndex(where: { $0.id == id }) else {
@@ -35,11 +37,13 @@ class DownloadManagerViewModel {
                     if newProgress >= 100.0 {
                         self.downloads[currentIndex].state = .completed
                         timer.invalidate()
+                        self.activeTimers.removeValue(forKey: item.id)
                     } else {
                         self.downloads[currentIndex].state = .downloading(progress: newProgress)
                     }
                 }
             }
+            activeTimers[id] = newTimer
         }
     }
     
@@ -49,6 +53,8 @@ class DownloadManagerViewModel {
             if case .downloading(let progress) = item.state {
                 downloads[index].state = .paused(progress: progress)
             }
+            activeTimers[id]?.invalidate()
+            activeTimers.removeValue(forKey: id)
         }
     }
     
@@ -90,5 +96,24 @@ class DownloadManagerViewModel {
         )
         
         downloads.append(newItem)
+    }
+    
+    func pauseAll() {
+        for item in downloads {
+            if case .downloading = item.state {
+                pauseDownload(id: item.id)
+            }
+        }
+    }
+
+    func resumeAll() {
+        for item in downloads {
+            switch item.state {
+            case .paused, .queued:
+                startDownload(id: item.id)
+            default:
+                break
+            }
+        }
     }
 }
